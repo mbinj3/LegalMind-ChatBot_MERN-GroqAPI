@@ -1,0 +1,26 @@
+.App {
+  text-align: center;
+}
+
+textarea{
+	resize: none;
+}
+
+.textview-container {
+	scrollbar-width: thin;
+	scrollbar-color: #121212 #555; 
+  } 
+  .textview-container::-webkit-scrollbar {
+	
+	width: 8px;
+  } 
+  .textview-container::-webkit-scrollbar-track {
+	background: #555;
+  }  
+  .textview-container::-webkit-scrollbar-thumb {
+	background: #121212;
+	border-radius: 5px;
+  } 
+  .textview-container::-webkit-scrollbar-thumb:hover {
+	background: #242424;
+  }
