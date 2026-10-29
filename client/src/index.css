@@ -3,15 +3,19 @@
 @tailwind utilities;
 
 @layer base {
-  body {
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
     @apply bg-slate-950 text-slate-100 antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
   /* Custom Sleek Scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
   }
   ::-webkit-scrollbar-track {
     background: #020617;
@@ -23,6 +27,29 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #334155;
   }
+}
+
+/* Dedicated stylish scrollbar for the chat container */
+.chat-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: #312e81 #020617;
+}
+
+.chat-scroll-container::-webkit-scrollbar {
+  width: 7px;
+}
+
+.chat-scroll-container::-webkit-scrollbar-track {
+  background: rgba(2, 6, 23, 0.8);
+}
+
+.chat-scroll-container::-webkit-scrollbar-thumb {
+  background: #312e81;
+  border-radius: 9999px;
+}
+
+.chat-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #4338ca;
 }
 
 @keyframes fadeIn {
