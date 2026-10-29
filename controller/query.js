@@ -6,12 +6,18 @@ function getGroqClient() {
     if (!apiKey || apiKey.trim() === '') {
         return null;
     }
-    return new Groq({ apiKey });
+    return new Groq({ apiKey: apiKey.trim() });
 }
 
-// Models to try in order of preference
-const PRIMARY_MODEL = 'llama-3.3-70b-versatile';
-const FALLBACK_MODELS = ['llama-3.1-8b-instant', 'mixtral-8x7b-32768'];
+// Preferred chat models in order of priority
+const PREFERRED_MODELS = [
+    'openai/gpt-oss-120b',
+    'qwen/qwen3.8-27b',
+    'openai/gpt-oss-20b',
+    'allam-2-7b',
+    'llama-3.3-70b-versatile',
+    'llama-3.1-8b-instant'
+];
 
 const SYSTEM_PROMPT = `You are LegalMind AI, an elite legal solution architect and jurisprudence assistant.
 Your goal is to provide structured, objective, and highly insightful legal summaries and statute identification.
@@ -37,7 +43,7 @@ const userQuery = async (req, res) => {
         const groq = getGroqClient();
         if (!groq) {
             return res.status(503).json({
-                error: 'GROQ_API_KEY is not configured on the server. Please add your API key to .env or Vercel Environment Variables.'
+                error: 'GROQ_API_KEY is not configured on the server. Please add your API key to Vercel Environment Variables.'
             });
         }
 
@@ -78,10 +84,24 @@ const userQuery = async (req, res) => {
             { role: 'user', content: userQuestion }
         ];
 
-        // Attempt completion with primary model, then fallback if needed
+        // Dynamically query available models from Groq account to find active ones
+        let candidateModels = [...PREFERRED_MODELS];
+        try {
+            const modelList = await groq.models.list();
+            if (modelList?.data && Array.isArray(modelList.data)) {
+                const availableIds = new Set(modelList.data.map(m => m.id));
+                const activePreferred = PREFERRED_MODELS.filter(id => availableIds.has(id));
+                if (activePreferred.length > 0) {
+                    candidateModels = activePreferred;
+                }
+            }
+        } catch (listErr) {
+            console.warn('[LegalMind] Could not fetch dynamic models list, using defaults:', listErr.message);
+        }
+
         let completion = null;
-        let activeModel = PRIMARY_MODEL;
-        const candidateModels = [PRIMARY_MODEL, ...FALLBACK_MODELS];
+        let activeModel = candidateModels[0];
+        let lastError = null;
 
         for (const model of candidateModels) {
             try {
@@ -92,17 +112,18 @@ const userQuery = async (req, res) => {
                     temperature: 0.3,
                     max_tokens: 2048,
                 });
+
                 if (completion?.choices?.[0]?.message?.content) {
                     break;
                 }
             } catch (err) {
+                lastError = err;
                 console.warn(`[LegalMind] Groq call failed on model ${model}:`, err?.message || err);
-                // Continue to next fallback model
             }
         }
 
         if (!completion?.choices?.[0]?.message?.content) {
-            throw new Error('All model completions failed or returned empty content.');
+            throw new Error(lastError?.message || 'All model completions failed or returned empty content.');
         }
 
         const summary = completion.choices[0].message.content;
@@ -116,7 +137,7 @@ const userQuery = async (req, res) => {
     } catch (error) {
         console.error('[LegalMind] Query Controller Error:', error?.message || error);
         return res.status(500).json({
-            error: 'Failed to process the legal query. Please verify your connection or try again shortly.'
+            error: error?.message || 'Failed to process the legal query. Please verify your connection or try again shortly.'
         });
     }
 };
