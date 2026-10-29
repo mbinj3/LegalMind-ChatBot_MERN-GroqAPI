@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import ChatList from '../components/ChatList';
 import ChatInput from '../components/ChatInput';
 import AboutModal from '../components/AboutModal';
+import ConfirmModal from '../components/ConfirmModal';
 
 const STORAGE_KEY = 'legalmind_chat_history_v2';
 
@@ -22,6 +23,7 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [draftText, setDraftText] = useState('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
   const bottomRef = useRef(null);
@@ -140,16 +142,15 @@ function Home() {
     }
   };
 
-  const handleClearChat = () => {
-    if (window.confirm('Are you sure you want to clear your current conversation history?')) {
-      setMessages([]);
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch (e) {
-        console.warn(e);
-      }
-      showToast('Conversation history cleared.');
+  const handleConfirmClearChat = () => {
+    setMessages([]);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.warn(e);
     }
+    setIsClearConfirmOpen(false);
+    showToast('Conversation history cleared.');
   };
 
   const handleExportChat = () => {
@@ -196,7 +197,7 @@ function Home() {
 
       {/* Header (fixed at top) */}
       <Header
-        onClearChat={handleClearChat}
+        onClearChat={() => setIsClearConfirmOpen(true)}
         onExportChat={handleExportChat}
         onOpenAbout={() => setIsAboutOpen(true)}
         hasMessages={messages.length > 0}
@@ -232,6 +233,18 @@ function Home() {
       <AboutModal
         isOpen={isAboutOpen}
         onClose={() => setIsAboutOpen(false)}
+      />
+
+      {/* Reusable Custom Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isClearConfirmOpen}
+        title="Clear conversation?"
+        message="This permanently deletes the chat history saved in this browser. Export it first if you want a copy."
+        confirmLabel="Clear history"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmClearChat}
+        onCancel={() => setIsClearConfirmOpen(false)}
+        destructive={true}
       />
     </div>
   );

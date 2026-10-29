@@ -1,6 +1,5 @@
 import React from 'react';
-import { FaBalanceScale, FaTrashAlt, FaDownload, FaInfoCircle } from 'react-icons/fa';
-import { HiShieldCheck } from 'react-icons/hi';
+import { FaBalanceScale, FaTrashAlt, FaDownload, FaInfoCircle, FaLock } from 'react-icons/fa';
 
 function Header({ onClearChat, onExportChat, onOpenAbout, hasMessages }) {
   return (
@@ -31,10 +30,15 @@ function Header({ onClearChat, onExportChat, onOpenAbout, hasMessages }) {
 
         {/* Action Controls & Status */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Security badge */}
-          <div className="hidden md:flex items-center gap-1.5 text-xs text-emerald-400/90 bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-1 rounded-full">
-            <HiShieldCheck className="text-sm" />
-            <span>Encrypted & Private</span>
+          {/* Storage status badge */}
+          <div
+            className="tooltip tooltip-bottom hidden md:inline-block before:text-xs before:max-w-xs before:leading-relaxed"
+            data-tip="Chats are stored only in your browser. Queries are sent to an AI provider for processing."
+          >
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/60 border border-slate-700/60 px-2.5 py-1 rounded-full cursor-help">
+              <FaLock className="text-[11px] text-slate-400" />
+              <span>Saved locally</span>
+            </div>
           </div>
 
           {/* Export Chat */}
@@ -78,4 +82,3 @@ function Header({ onClearChat, onExportChat, onOpenAbout, hasMessages }) {
 }
 
 export default Header;
-

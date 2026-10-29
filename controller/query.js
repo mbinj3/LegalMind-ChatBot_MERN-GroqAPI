@@ -100,12 +100,10 @@ const userQuery = async (req, res) => {
         }
 
         let completion = null;
-        let activeModel = candidateModels[0];
         let lastError = null;
 
         for (const model of candidateModels) {
             try {
-                activeModel = model;
                 completion = await groq.chat.completions.create({
                     messages,
                     model,
@@ -130,7 +128,6 @@ const userQuery = async (req, res) => {
 
         return res.status(200).json({
             summary,
-            model: activeModel,
             timestamp: new Date().toISOString()
         });
 
