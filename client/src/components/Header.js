@@ -1,6 +1,6 @@
 import React from 'react';
-import { FaBalanceScale, FaTrashAlt, FaDownload, FaInfoCircle } from 'react-icons/fa';
-import { HiShieldCheck } from 'react-icons/hi';
+import { FaBalanceScale, FaTrashAlt, FaDownload, FaInfoCircle, FaLock } from 'react-icons/fa';
+import Tooltip from './Tooltip';
 
 function Header({ onClearChat, onExportChat, onOpenAbout, hasMessages }) {
   return (
@@ -11,7 +11,7 @@ function Header({ onClearChat, onExportChat, onOpenAbout, hasMessages }) {
         <div className="flex items-center gap-3">
           <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-md shadow-indigo-500/20 text-white">
             <FaBalanceScale className="text-xl" />
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full" title="AI Engine Online"></span>
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full" aria-hidden="true"></span>
           </div>
 
           <div>
@@ -31,45 +31,60 @@ function Header({ onClearChat, onExportChat, onOpenAbout, hasMessages }) {
 
         {/* Action Controls & Status */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Security badge */}
-          <div className="hidden md:flex items-center gap-1.5 text-xs text-emerald-400/90 bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-1 rounded-full">
-            <HiShieldCheck className="text-sm" />
-            <span>Encrypted & Private</span>
+          {/* Storage status badge with custom Tooltip */}
+          <div className="hidden md:inline-flex">
+            <Tooltip content="Chats are stored only in your browser. Queries are sent to an AI provider for processing.">
+              <div
+                tabIndex={0}
+                className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/60 border border-slate-700/60 px-2.5 py-1 rounded-full cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+              >
+                <FaLock className="text-[11px] text-slate-400" />
+                <span>Saved locally</span>
+              </div>
+            </Tooltip>
           </div>
 
           {/* Export Chat */}
           {hasMessages && (
-            <button
-              onClick={onExportChat}
-              className="btn btn-ghost btn-sm text-slate-300 hover:text-white hover:bg-slate-800 gap-1.5 text-xs"
-              title="Export Conversation as Markdown"
-            >
-              <FaDownload className="text-xs" />
-              <span className="hidden sm:inline">Export</span>
-            </button>
+            <Tooltip content="Export as Markdown">
+              <button
+                type="button"
+                onClick={onExportChat}
+                className="btn btn-ghost btn-sm text-slate-300 hover:text-white hover:bg-slate-800 gap-1.5 text-xs"
+                aria-label="Export conversation as Markdown"
+              >
+                <FaDownload className="text-xs" />
+                <span className="hidden sm:inline">Export</span>
+              </button>
+            </Tooltip>
           )}
 
           {/* Clear Chat */}
           {hasMessages && (
-            <button
-              onClick={onClearChat}
-              className="btn btn-ghost btn-sm text-rose-400/80 hover:text-rose-300 hover:bg-rose-950/30 gap-1.5 text-xs"
-              title="Clear all messages"
-            >
-              <FaTrashAlt className="text-xs" />
-              <span className="hidden sm:inline">Clear</span>
-            </button>
+            <Tooltip content="Clear conversation">
+              <button
+                type="button"
+                onClick={onClearChat}
+                className="btn btn-ghost btn-sm text-rose-400/80 hover:text-rose-300 hover:bg-rose-950/30 gap-1.5 text-xs"
+                aria-label="Clear all messages"
+              >
+                <FaTrashAlt className="text-xs" />
+                <span className="hidden sm:inline">Clear</span>
+              </button>
+            </Tooltip>
           )}
 
           {/* About / Disclaimer Modal Trigger */}
-          <button
-            onClick={onOpenAbout}
-            className="btn btn-circle btn-ghost btn-sm text-slate-400 hover:text-indigo-300 hover:bg-slate-800"
-            title="About LegalMind & Disclaimers"
-            aria-label="About LegalMind"
-          >
-            <FaInfoCircle className="text-base" />
-          </button>
+          <Tooltip content="About LegalMind">
+            <button
+              type="button"
+              onClick={onOpenAbout}
+              className="btn btn-circle btn-ghost btn-sm text-slate-400 hover:text-indigo-300 hover:bg-slate-800"
+              aria-label="About LegalMind and Disclaimers"
+            >
+              <FaInfoCircle className="text-base" />
+            </button>
+          </Tooltip>
         </div>
 
       </div>
@@ -78,4 +93,3 @@ function Header({ onClearChat, onExportChat, onOpenAbout, hasMessages }) {
 }
 
 export default Header;
-

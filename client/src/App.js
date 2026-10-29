@@ -1,11 +1,12 @@
 import './App.css';
 import Home from './pages/Home';
+import { ToastProvider } from './components/Toast';
 
 function App() {
   return (
-    <div>
+    <ToastProvider>
       <Home />
-    </div>
+    </ToastProvider>
   );
 }
 

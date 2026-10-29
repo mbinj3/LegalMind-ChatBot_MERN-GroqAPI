@@ -24,7 +24,7 @@ function Footer({ onOpenAbout }) {
           </button>
           <span>•</span>
           <span className="text-slate-500">
-            Powered by <strong className="text-slate-400 font-medium">Groq LLaMA 3.3</strong>
+            Powered by <strong className="text-slate-400 font-medium">Groq</strong>
           </span>
         </div>
 
@@ -34,4 +34,3 @@ function Footer({ onOpenAbout }) {
 }
 
 export default Footer;
-

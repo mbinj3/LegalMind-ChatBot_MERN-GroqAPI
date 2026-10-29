@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IoSend } from 'react-icons/io5';
 import { FaRegTimesCircle } from 'react-icons/fa';
+import Tooltip from './Tooltip';
+import { useToast } from './Toast';
 
 const MAX_CHAR_LIMIT = 8000;
 const MIN_CHAR_LIMIT = 5;
@@ -8,6 +10,7 @@ const MIN_CHAR_LIMIT = 5;
 function ChatInput({ onSendMessage, loading, draftText, setDraftText }) {
   const [errorMsg, setErrorMsg] = useState('');
   const textareaRef = useRef(null);
+  const toast = useToast();
 
   // Auto-resize textarea as content changes
   useEffect(() => {
@@ -26,17 +29,23 @@ function ChatInput({ onSendMessage, loading, draftText, setDraftText }) {
     const trimmed = (draftText || '').trim();
 
     if (!trimmed) {
-      setErrorMsg('Please enter details of the legal dispute, contract, or case.');
+      const msg = 'Please enter details of the legal dispute, contract, or case.';
+      setErrorMsg(msg);
+      toast.warning(msg);
       return;
     }
 
     if (trimmed.length < MIN_CHAR_LIMIT) {
-      setErrorMsg(`Please provide at least ${MIN_CHAR_LIMIT} characters describing your case.`);
+      const msg = `Please provide at least ${MIN_CHAR_LIMIT} characters describing your case.`;
+      setErrorMsg(msg);
+      toast.warning(msg);
       return;
     }
 
     if (trimmed.length > MAX_CHAR_LIMIT) {
-      setErrorMsg(`Inquiry exceeds maximum allowed length of ${MAX_CHAR_LIMIT} characters.`);
+      const msg = `Inquiry exceeds maximum allowed length of ${MAX_CHAR_LIMIT} characters.`;
+      setErrorMsg(msg);
+      toast.error(msg);
       return;
     }
 
@@ -54,6 +63,7 @@ function ChatInput({ onSendMessage, loading, draftText, setDraftText }) {
 
   const charCount = (draftText || '').length;
   const isOverLimit = charCount > MAX_CHAR_LIMIT;
+  const isSubmitDisabled = loading || !draftText?.trim() || isOverLimit;
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 pb-4">
@@ -86,29 +96,33 @@ function ChatInput({ onSendMessage, loading, draftText, setDraftText }) {
                   setErrorMsg('');
                 }}
                 className="text-slate-500 hover:text-slate-300 p-1.5 transition-colors"
-                title="Clear input"
+                aria-label="Clear input draft"
               >
                 <FaRegTimesCircle className="text-base" />
               </button>
             )}
 
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading || !draftText?.trim() || isOverLimit}
-              className={`flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all flex-shrink-0 ${
-                loading || !draftText?.trim() || isOverLimit
-                  ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white shadow-md shadow-indigo-600/30'
-              }`}
-              title="Submit legal inquiry"
-            >
-              {loading ? (
-                <span className="loading loading-spinner loading-xs text-white"></span>
-              ) : (
-                <IoSend className="text-lg translate-x-0.5" />
-              )}
-            </button>
+            {/* Submit button with custom Tooltip */}
+            <Tooltip content="Submit legal inquiry">
+              <span className="inline-flex">
+                <button
+                  type="submit"
+                  disabled={isSubmitDisabled}
+                  className={`flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all flex-shrink-0 ${
+                    isSubmitDisabled
+                      ? 'bg-slate-800 text-slate-600 pointer-events-none'
+                      : 'bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white shadow-md shadow-indigo-600/30'
+                  }`}
+                  aria-label="Submit legal inquiry"
+                >
+                  {loading ? (
+                    <span className="loading loading-spinner loading-xs text-white"></span>
+                  ) : (
+                    <IoSend className="text-lg translate-x-0.5" />
+                  )}
+                </button>
+              </span>
+            </Tooltip>
           </div>
 
           {/* Bottom metadata bar */}
@@ -145,4 +159,3 @@ function ChatInput({ onSendMessage, loading, draftText, setDraftText }) {
 }
 
 export default ChatInput;
-

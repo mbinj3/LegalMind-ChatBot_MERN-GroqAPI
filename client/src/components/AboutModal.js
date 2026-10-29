@@ -1,18 +1,94 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FaBalanceScale, FaShieldAlt, FaTimes } from 'react-icons/fa';
 
 function AboutModal({ isOpen, onClose }) {
+  const modalRef = useRef(null);
+  const previouslyFocusedElementRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Remember currently focused element to return focus on close
+    previouslyFocusedElementRef.current = document.activeElement;
+
+    // Lock body scroll
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // Move focus inside the modal
+    const focusable = modalRef.current?.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable && focusable.length > 0) {
+      focusable[0].focus();
+    }
+
+    // Keyboard handlers: Esc and focus trap
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        const focusableElements = Array.from(
+          modalRef.current?.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          ) || []
+        );
+
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+      // Return focus on close
+      if (previouslyFocusedElementRef.current && typeof previouslyFocusedElementRef.current.focus === 'function') {
+        previouslyFocusedElementRef.current.focus();
+      }
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 text-slate-200">
-        
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn"
+      onClick={onClose}
+    >
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="about-modal-title"
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 text-slate-200 outline-none"
+      >
         {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors"
-          title="Close modal"
+          aria-label="Close modal"
         >
           <FaTimes className="text-base" />
         </button>
@@ -23,7 +99,9 @@ function AboutModal({ isOpen, onClose }) {
             <FaBalanceScale className="text-xl" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">About LegalMind AI</h3>
+            <h3 id="about-modal-title" className="text-lg font-bold text-white">
+              About LegalMind AI
+            </h3>
             <p className="text-xs text-indigo-300">Intelligent Legal Framework Synthesis</p>
           </div>
         </div>
@@ -41,9 +119,9 @@ function AboutModal({ isOpen, onClose }) {
           </div>
 
           <div>
-            <h4 className="font-semibold text-white mb-1">Architecture & Privacy</h4>
+            <h4 className="font-semibold text-white mb-1">How your data is handled</h4>
             <p className="text-slate-400">
-              Queries are processed using secure Groq LLaMA 3.3 serverless inference with in-memory rate limiting and HTTP security headers. Your local chat session is saved in your browser storage so you can review previous queries.
+              Your description is sent to a third-party AI service to generate the analysis. LegalMind doesn't store your queries on a server. Your chat history is saved only in this browser and can be cleared anytime.
             </p>
           </div>
 
@@ -73,4 +151,3 @@ function AboutModal({ isOpen, onClose }) {
 }
 
 export default AboutModal;
-
