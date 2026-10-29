@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaBalanceScale, FaUser, FaRegCopy, FaCheck, FaGavel, FaExclamationTriangle, FaRedo } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
 import FormattedMessage from './FormattedMessage';
+import { useToast } from './Toast';
 
 const SAMPLE_CASES = [
   {
@@ -28,15 +29,18 @@ const SAMPLE_CASES = [
 
 function MessageBubble({ message, onRetry }) {
   const [copied, setCopied] = useState(false);
+  const toast = useToast();
   const isUser = message.sender === 'user';
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(message.text);
       setCopied(true);
+      toast.success('Analysis copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy to clipboard', err);
+      toast.error('Could not copy to clipboard. Please select text manually.');
     }
   };
 
@@ -61,7 +65,7 @@ function MessageBubble({ message, onRetry }) {
 
         {/* Bubble Container */}
         <div className="flex-1 min-w-0">
-          {/* Header info - NO model name */}
+          {/* Header info */}
           <div className={`flex items-center gap-2 mb-1.5 text-xs text-slate-400 ${isUser ? 'justify-end' : 'justify-start'}`}>
             <span className="font-semibold text-slate-300">
               {isUser ? 'You' : 'LegalMind AI'}
@@ -92,9 +96,10 @@ function MessageBubble({ message, onRetry }) {
             <div className="flex items-center justify-between mt-1.5 px-1 text-xs text-slate-500">
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={handleCopy}
                   className="flex items-center gap-1.5 hover:text-indigo-300 transition-colors py-1 px-2 rounded hover:bg-slate-800/60"
-                  title="Copy analysis to clipboard"
+                  aria-label="Copy analysis to clipboard"
                 >
                   {copied ? (
                     <>
@@ -123,6 +128,7 @@ function MessageBubble({ message, onRetry }) {
               </div>
               {onRetry && (
                 <button
+                  type="button"
                   onClick={() => onRetry(message.retryQuery)}
                   className="btn btn-xs btn-outline btn-error gap-1"
                 >

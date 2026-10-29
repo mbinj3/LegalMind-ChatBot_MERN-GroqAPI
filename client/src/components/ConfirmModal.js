@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { FaExclamationTriangle, FaTimes } from 'react-icons/fa';
+import { FaExclamationTriangle, FaTimes, FaFileDownload } from 'react-icons/fa';
 
 function ConfirmModal({
   isOpen,
@@ -9,11 +9,15 @@ function ConfirmModal({
   cancelLabel = 'Cancel',
   onConfirm,
   onCancel,
-  destructive = true
+  variant = 'danger', // 'danger' | 'primary'
+  destructive // backward compatibility fallback
 }) {
   const modalRef = useRef(null);
   const cancelBtnRef = useRef(null);
   const previouslyFocusedElementRef = useRef(null);
+
+  // Normalize variant: if destructive is explicitly passed, map it
+  const isDanger = variant === 'danger' || (destructive === true && variant !== 'primary');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -103,12 +107,16 @@ function ConfirmModal({
         <div className="flex items-center gap-3 mb-4">
           <div
             className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-              destructive
+              isDanger
                 ? 'bg-rose-950/60 border border-rose-800/60 text-rose-400'
                 : 'bg-indigo-600/20 border border-indigo-500/30 text-indigo-400'
             }`}
           >
-            <FaExclamationTriangle className="text-lg" />
+            {isDanger ? (
+              <FaExclamationTriangle className="text-lg" />
+            ) : (
+              <FaFileDownload className="text-lg text-indigo-400" />
+            )}
           </div>
           <div>
             <h3 id="confirm-modal-title" className="text-lg font-bold text-white">
@@ -136,9 +144,9 @@ function ConfirmModal({
             type="button"
             onClick={onConfirm}
             className={`btn btn-sm text-white px-4 border-none ${
-              destructive
+              isDanger
                 ? 'bg-rose-600 hover:bg-rose-500 shadow-md shadow-rose-950/50'
-                : 'bg-indigo-600 hover:bg-indigo-500'
+                : 'bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-950/50'
             }`}
           >
             {confirmLabel}
@@ -151,4 +159,3 @@ function ConfirmModal({
 }
 
 export default ConfirmModal;
-

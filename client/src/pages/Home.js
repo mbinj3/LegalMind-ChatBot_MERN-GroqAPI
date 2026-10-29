@@ -5,6 +5,7 @@ import ChatList from '../components/ChatList';
 import ChatInput from '../components/ChatInput';
 import AboutModal from '../components/AboutModal';
 import ConfirmModal from '../components/ConfirmModal';
+import { useToast } from '../components/Toast';
 
 const STORAGE_KEY = 'legalmind_chat_history_v2';
 
@@ -24,8 +25,9 @@ function Home() {
   const [draftText, setDraftText] = useState('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState(null);
+  const [isExportConfirmOpen, setIsExportConfirmOpen] = useState(false);
 
+  const toast = useToast();
   const bottomRef = useRef(null);
 
   // Sync messages to localStorage
@@ -41,13 +43,6 @@ function Home() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
-
-  const showToast = (msg, duration = 4000) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage((current) => (current === msg ? null : current));
-    }, duration);
-  };
 
   const handleSendMessage = async (textToSend) => {
     if (!textToSend || loading) return;
@@ -98,6 +93,11 @@ function Home() {
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
+        if (response.status === 429) {
+          const rateMsg = data?.error || 'Too many requests. Please wait a moment before submitting another inquiry.';
+          toast.warning(rateMsg);
+          throw new Error(rateMsg);
+        }
         const errorDetail = data?.error || `Server responded with status ${response.status}`;
         throw new Error(errorDetail);
       }
@@ -120,10 +120,10 @@ function Home() {
 
       let friendlyError = err.message;
       if (err.name === 'AbortError') {
-        friendlyError = 'Request timed out after 60 seconds. The analysis service is currently busy.';
+        friendlyError = 'Request timed out after 60 seconds. The analysis service is currently busy. You can use Retry.';
       }
 
-      showToast(`Error: ${friendlyError}`);
+      toast.error(`${friendlyError} (Click Retry below to try again)`);
 
       // Also append error state to the assistant turn so the user can easily retry
       const assistantErrorMessage = {
@@ -150,34 +150,44 @@ function Home() {
       console.warn(e);
     }
     setIsClearConfirmOpen(false);
-    showToast('Conversation history cleared.');
+    toast.success('Conversation history permanently cleared');
   };
 
-  const handleExportChat = () => {
-    if (messages.length === 0) return;
+  const handlePerformExport = () => {
+    setIsExportConfirmOpen(false);
 
-    let transcript = `# LegalMind AI — Case Analysis Transcript\n`;
-    transcript += `*Generated on: ${new Date().toLocaleString()}*\n\n---\n\n`;
+    if (messages.length === 0) {
+      toast.info('No messages to export yet.');
+      return;
+    }
 
-    messages.forEach((m, idx) => {
-      const role = m.sender === 'user' ? 'USER' : 'LEGALMIND AI';
-      transcript += `### ${idx + 1}. ${role} (${new Date(m.timestamp).toLocaleTimeString()})\n\n`;
-      transcript += `${m.text}\n\n---\n\n`;
-    });
+    try {
+      let transcript = `# LegalMind AI — Case Analysis Transcript\n`;
+      transcript += `*Generated on: ${new Date().toLocaleString()}*\n\n---\n\n`;
 
-    transcript += `\n*Disclaimer: For informational and research purposes only. Not formal legal advice.*`;
+      messages.forEach((m, idx) => {
+        const role = m.sender === 'user' ? 'USER' : 'LEGALMIND AI';
+        transcript += `### ${idx + 1}. ${role} (${new Date(m.timestamp).toLocaleTimeString()})\n\n`;
+        transcript += `${m.text}\n\n---\n\n`;
+      });
 
-    const blob = new Blob([transcript], { type: 'text/markdown;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `legalmind-transcript-${new Date().toISOString().slice(0, 10)}.md`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+      transcript += `\n*Disclaimer: For informational and research purposes only. Not formal legal advice.*`;
 
-    showToast('Conversation exported as Markdown.');
+      const blob = new Blob([transcript], { type: 'text/markdown;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `legalmind-transcript-${new Date().toISOString().slice(0, 10)}.md`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success('Conversation exported as Markdown (.md)');
+    } catch (err) {
+      console.error('Export error:', err);
+      toast.error('Failed to export conversation. Please try again.');
+    }
   };
 
   const handleSelectSample = (samplePrompt) => {
@@ -186,19 +196,10 @@ function Home() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-950 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white">
-      {/* Toast Alert */}
-      {toastMessage && (
-        <div className="toast toast-top toast-center z-50">
-          <div className="alert alert-warning bg-amber-950/90 border border-amber-600/50 text-amber-200 text-xs sm:text-sm shadow-xl backdrop-blur-md">
-            <span>{toastMessage}</span>
-          </div>
-        </div>
-      )}
-
       {/* Header (fixed at top) */}
       <Header
         onClearChat={() => setIsClearConfirmOpen(true)}
-        onExportChat={handleExportChat}
+        onExportChat={() => setIsExportConfirmOpen(true)}
         onOpenAbout={() => setIsAboutOpen(true)}
         hasMessages={messages.length > 0}
       />
@@ -235,7 +236,7 @@ function Home() {
         onClose={() => setIsAboutOpen(false)}
       />
 
-      {/* Reusable Custom Confirmation Modal */}
+      {/* Reusable ConfirmModal for Clear Chat (Destructive / Danger Variant) */}
       <ConfirmModal
         isOpen={isClearConfirmOpen}
         title="Clear conversation?"
@@ -244,7 +245,19 @@ function Home() {
         cancelLabel="Cancel"
         onConfirm={handleConfirmClearChat}
         onCancel={() => setIsClearConfirmOpen(false)}
-        destructive={true}
+        variant="danger"
+      />
+
+      {/* Reusable ConfirmModal for Export Chat (Primary / Brand Variant) */}
+      <ConfirmModal
+        isOpen={isExportConfirmOpen}
+        title="Export conversation?"
+        message="Your chat will be downloaded as a Markdown (.md) file."
+        confirmLabel="Export"
+        cancelLabel="Cancel"
+        onConfirm={handlePerformExport}
+        onCancel={() => setIsExportConfirmOpen(false)}
+        variant="primary"
       />
     </div>
   );
