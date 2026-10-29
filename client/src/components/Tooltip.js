@@ -89,12 +89,13 @@ function Tooltip({
   return (
     <div
       ref={triggerRef}
+      tabIndex={0}
       onMouseEnter={showTooltip}
       onMouseLeave={hideTooltip}
       onFocus={showTooltip}
       onBlur={hideTooltip}
       aria-describedby={isVisible ? tooltipId : undefined}
-      className={`inline-flex ${className}`}
+      className={`inline-flex outline-none focus:outline-none ${className}`}
     >
       {children}
 
@@ -131,4 +132,3 @@ function Tooltip({
 }
 
 export default Tooltip;
-

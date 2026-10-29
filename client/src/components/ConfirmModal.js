@@ -97,7 +97,6 @@ function ConfirmModal({
         <button
           onClick={onCancel}
           className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors"
-          title="Close dialog"
           aria-label="Close dialog"
         >
           <FaTimes className="text-base" />

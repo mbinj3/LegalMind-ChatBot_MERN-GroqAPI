@@ -36,7 +36,7 @@ function Header({ onClearChat, onExportChat, onOpenAbout, hasMessages }) {
             <Tooltip content="Chats are stored only in your browser. Queries are sent to an AI provider for processing.">
               <div
                 tabIndex={0}
-                className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/60 border border-slate-700/60 px-2.5 py-1 rounded-full cursor-help focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/60 border border-slate-700/60 px-2.5 py-1 rounded-full cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
               >
                 <FaLock className="text-[11px] text-slate-400" />
                 <span>Saved locally</span>

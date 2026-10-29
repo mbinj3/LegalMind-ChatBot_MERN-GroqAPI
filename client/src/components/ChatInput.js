@@ -63,6 +63,7 @@ function ChatInput({ onSendMessage, loading, draftText, setDraftText }) {
 
   const charCount = (draftText || '').length;
   const isOverLimit = charCount > MAX_CHAR_LIMIT;
+  const isSubmitDisabled = loading || !draftText?.trim() || isOverLimit;
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 pb-4">
@@ -103,22 +104,24 @@ function ChatInput({ onSendMessage, loading, draftText, setDraftText }) {
 
             {/* Submit button with custom Tooltip */}
             <Tooltip content="Submit legal inquiry">
-              <button
-                type="submit"
-                disabled={loading || !draftText?.trim() || isOverLimit}
-                className={`flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all flex-shrink-0 ${
-                  loading || !draftText?.trim() || isOverLimit
-                    ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                    : 'bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white shadow-md shadow-indigo-600/30'
-                }`}
-                aria-label="Submit legal inquiry"
-              >
-                {loading ? (
-                  <span className="loading loading-spinner loading-xs text-white"></span>
-                ) : (
-                  <IoSend className="text-lg translate-x-0.5" />
-                )}
-              </button>
+              <span className="inline-flex">
+                <button
+                  type="submit"
+                  disabled={isSubmitDisabled}
+                  className={`flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all flex-shrink-0 ${
+                    isSubmitDisabled
+                      ? 'bg-slate-800 text-slate-600 pointer-events-none'
+                      : 'bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white shadow-md shadow-indigo-600/30'
+                  }`}
+                  aria-label="Submit legal inquiry"
+                >
+                  {loading ? (
+                    <span className="loading loading-spinner loading-xs text-white"></span>
+                  ) : (
+                    <IoSend className="text-lg translate-x-0.5" />
+                  )}
+                </button>
+              </span>
             </Tooltip>
           </div>
 
