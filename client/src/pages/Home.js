@@ -35,7 +35,7 @@ function Home() {
     }
   }, [messages]);
 
-  // Auto-scroll to bottom when messages update or loading starts
+  // Auto-scroll to bottom inside the chat container when messages update or loading starts
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
@@ -76,7 +76,7 @@ function Home() {
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
     try {
-      const apiUrl = `${window.location.origin}/user-query/case-details`;
+      const apiUrl = '/user-query/case-details';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -108,7 +108,6 @@ function Home() {
         id: `ai_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
         sender: 'assistant',
         text: data.summary,
-        model: data.model || 'Groq LLaMA 3.3',
         timestamp: data.timestamp || new Date().toISOString()
       };
 
@@ -185,7 +184,7 @@ function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white">
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-950 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white">
       {/* Toast Alert */}
       {toastMessage && (
         <div className="toast toast-top toast-center z-50">
@@ -195,7 +194,7 @@ function Home() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header (fixed at top) */}
       <Header
         onClearChat={handleClearChat}
         onExportChat={handleExportChat}
@@ -203,8 +202,8 @@ function Home() {
         hasMessages={messages.length > 0}
       />
 
-      {/* Main Chat Area */}
-      <main className="flex-1 overflow-y-auto">
+      {/* Main Chat Scrollable Container */}
+      <div className="flex-1 overflow-y-auto overscroll-contain chat-scroll-container">
         <ChatList
           messages={messages}
           loading={loading}
@@ -212,10 +211,10 @@ function Home() {
           bottomRef={bottomRef}
           onRetry={handleSendMessage}
         />
-      </main>
+      </div>
 
-      {/* Input Area (Sticky at bottom) */}
-      <div className="sticky bottom-0 z-30 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pt-4">
+      {/* Input Area (fixed above footer) */}
+      <div className="flex-shrink-0 z-30 bg-slate-950/95 border-t border-slate-900/60 pt-3 pb-1 backdrop-blur-md">
         <ChatInput
           onSendMessage={handleSendMessage}
           loading={loading}
@@ -224,8 +223,10 @@ function Home() {
         />
       </div>
 
-      {/* Footer */}
-      <Footer onOpenAbout={() => setIsAboutOpen(true)} />
+      {/* Footer (fixed at bottom) */}
+      <div className="flex-shrink-0">
+        <Footer onOpenAbout={() => setIsAboutOpen(true)} />
+      </div>
 
       {/* About & Disclaimer Modal */}
       <AboutModal

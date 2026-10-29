@@ -46,7 +46,7 @@ function MessageBubble({ message, onRetry }) {
 
   return (
     <div className={`flex w-full mb-6 ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex gap-3 max-w-3xl w-full ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+      <div className={`flex gap-3 max-w-4xl w-full ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         
         {/* Avatar */}
         <div
@@ -61,16 +61,11 @@ function MessageBubble({ message, onRetry }) {
 
         {/* Bubble Container */}
         <div className="flex-1 min-w-0">
-          {/* Header info */}
-          <div className={`flex items-center gap-2 mb-1 text-xs text-slate-400 ${isUser ? 'justify-end' : 'justify-start'}`}>
+          {/* Header info - NO model name */}
+          <div className={`flex items-center gap-2 mb-1.5 text-xs text-slate-400 ${isUser ? 'justify-end' : 'justify-start'}`}>
             <span className="font-semibold text-slate-300">
               {isUser ? 'You' : 'LegalMind AI'}
             </span>
-            {message.model && (
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800/80 text-indigo-300 border border-slate-700/60 font-mono">
-                {message.model}
-              </span>
-            )}
             <span>•</span>
             <span>{formattedTime}</span>
           </div>
@@ -237,4 +232,3 @@ function ChatList({ messages, loading, onSelectSample, bottomRef, onRetry }) {
 }
 
 export default ChatList;
-
