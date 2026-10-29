@@ -2,6 +2,16 @@
 
 Legal Mind is an AI-powered legal analysis application that transforms complex legal scenarios into structured analytical summaries, relevant statutory references and actionable next steps. It helps users evaluate legal issues more efficiently through an interactive conversational interface powered by Groq AI inference.
 
+![Legal Mind Application Preview1](./screenshots/legal-mind-preview1.png)
+
+![Legal Mind Application Preview 2](./screenshots/legal-mind-preview2.png)
+
+![Legal Mind Application Preview 3](./screenshots/legal-mind-preview3.png)
+
+![Legal Mind Application Preview 4](./screenshots/legal-mind-preview4.png)
+
+![Legal Mind Application Preview 5](./screenshots/legal-mind-preview5.png)
+
 ## ⚖️ The Problem
 
 Understanding complex legal disputes, contract breaches and statutory codes can be time-consuming, expensive and challenging for individuals and businesses, especially those without legal expertise.
